@@ -55,7 +55,12 @@ private:
     bool _is_udp = false;
     bool _search_rtp = false;
     bool _search_rtp_finished = false;
-    bool _emit_detach = false;
+    // 本session是否独占拥有_process的生命周期。
+    // 通过setRtpProcess注入的是RtcpHelper共享的process(同一stream_id下多个tcp连接复用), 不独占;
+    // 在onRtpPacket中本地创建的process才是本session独占拥有的。
+    // 只有独占拥有的session在连接关闭时才允许触发process detach, 否则探测端口的tcp连接关闭
+    // 会误杀共享的process, 导致整个RtpServer被销毁、udp/tcp端口全部消失。
+    bool _owns_process = false;
     int _only_track = 0;
     uint32_t _ssrc = 0;
     toolkit::Ticker _ticker;

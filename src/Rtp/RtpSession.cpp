@@ -65,7 +65,10 @@ void RtpSession::onRecv(const Buffer::Ptr &data) {
 }
 
 void RtpSession::onError(const SockException &err) {
-    if (_emit_detach) {
+    // 仅当本session独占拥有process时才在连接关闭时触发detach;
+    // 共享的process(由setRtpProcess注入)由RtcpHelper管理生命周期, 不因单个tcp连接关闭而detach,
+    // 避免探测端口的tcp连接(如Test-NetConnection/nc)关闭后误杀整个RtpServer导致推流端口消失。
+    if (_owns_process && _process) {
         _process->onDetach(err);
     }
     WarnP(this) << _tuple.shortUrl() << " " << err;
@@ -78,8 +81,9 @@ void RtpSession::onManager() {
 }
 
 void RtpSession::setRtpProcess(RtpProcess::Ptr process) {
-    _emit_detach = (bool)process;
+    // 注入的process由RtcpHelper共享管理, 本session不独占其生命周期, 不能因本连接关闭而detach
     _process = std::move(process);
+    _owns_process = false;
 }
 
 void RtpSession::onRtpPacket(const char *data, size_t len) {
@@ -124,6 +128,7 @@ void RtpSession::onRtpPacket(const char *data, size_t len) {
     if (!_process) {
         _process = RtpProcess::createProcess(_tuple);
         _process->setOnlyTrack((RtpProcess::OnlyTrack)_only_track);
+        _owns_process = true;
         weak_ptr<RtpSession>  weak_self = static_pointer_cast<RtpSession>(shared_from_this());
         _process->setOnDetach([weak_self](const SockException &ex) {
             if (auto strong_self = weak_self.lock()) {

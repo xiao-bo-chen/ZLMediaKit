@@ -183,7 +183,8 @@ void RtpServer::start(uint16_t local_port, const char *local_ip, const MediaTupl
             if (ssrc && rtp_ssrc != ssrc) {
                 WarnL << "ssrc mismatched, rtp dropped: " << rtp_ssrc << " != " << ssrc;
             } else {
-                if (!bind_peer_addr) {
+                GET_CONFIG(int, bind_source, RtpProxy::kBindSource);
+                if (!bind_peer_addr && bind_source) {
                     // 绑定对方ip+端口，防止多个设备或一个设备多次推流从而日志报ssrc不匹配问题  [AUTO-TRANSLATED:f27dd373]
                     // Bind the peer IP + port to prevent multiple devices or one device from pushing multiple streams, resulting in log reports of mismatched SSRCs
                     bind_peer_addr = true;

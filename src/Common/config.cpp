@@ -387,6 +387,7 @@ const string kGopCache = RTP_PROXY_FIELD "gop_cache";
 const string kRtpG711DurMs = RTP_PROXY_FIELD "rtp_g711_dur_ms";
 const string kUdpRecvSocketBuffer = RTP_PROXY_FIELD "udp_recv_socket_buffer";
 const std::string kMergeFrame = RTP_PROXY_FIELD "merge_frame";
+const std::string kBindSource = RTP_PROXY_FIELD "bind_source";
 
 static onceToken token([]() {
     mINI::Instance()[kDumpDir] = "";
@@ -400,6 +401,7 @@ static onceToken token([]() {
     mINI::Instance()[kRtpG711DurMs] = 100;
     mINI::Instance()[kUdpRecvSocketBuffer] = 4 * 1024 * 1024;
     mINI::Instance()[kMergeFrame] = 1;
+    mINI::Instance()[kBindSource] = 1;
 });
 } // namespace RtpProxy
 

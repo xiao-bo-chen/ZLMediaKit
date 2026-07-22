@@ -579,6 +579,8 @@ extern const std::string kRtpG711DurMs;
 extern const std::string kUdpRecvSocketBuffer;
 // ps/ts解析后是否等待下一帧以判断本帧是否完整，开启后提高兼容性，但是可能增加延时
 extern const std::string kMergeFrame;
+// rtp端口是否锁定对端ip+端口(connect锁源)，默认1保持原行为；设为0则不锁源，允许任意源发送(用于级联探活等场景)
+extern const std::string kBindSource;
 } // namespace RtpProxy
 
 /**
